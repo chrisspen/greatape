@@ -27,7 +27,18 @@ except ImportError:
 
 
 class MailChimpError(Exception):
-    pass
+    def __init__(self, msg, code=None):
+        self.msg = msg
+        self.code = code
+
+    def __repr__(self):
+        return self.msg
+
+    def __unicode__(self):
+        return self.msg
+
+    def __str__(self):
+        return self.msg
 
 
 class MailChimp(object):
@@ -74,7 +85,10 @@ class MailChimp(object):
             response = json.loads(handle.read())
             try:
                 if 'error' in response:
-                    raise MailChimpError(response['error'])
+                    if 'code' in response:
+                        raise MailChimpError(response['error'], response['code'])
+                    else:
+                        raise MailChimpError(response['error'])
             except TypeError: # the response was boolean
                 pass
             return response
